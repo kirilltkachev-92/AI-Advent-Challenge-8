@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="DeepSeek Chat" type="JetRunConfigurationType" factoryName="Kotlin">
+    <option name="MAIN_CLASS_NAME" value="MainKt" />
+    <module name="day-1.main" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="EMULATE_TERMINAL" value="true" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

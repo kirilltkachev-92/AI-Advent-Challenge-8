@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Run DeepSeek Chat",
+      "request": "launch",
+      "mainClass": "MainKt",
+      "projectName": "day-2",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "preLaunchTask": "compile",
+      "shortenCommandLine": "argfile"
+    }
+  ]
+}

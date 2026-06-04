@@ -38,8 +38,8 @@ export DEEPSEEK_API_KEY="..."   # или файл .env
 
 Запишите 2–5 минут по чеклисту в [VIDEO.md](VIDEO.md) и вставьте ссылку сюда:
 
-`<!-- Ссылка на видео: -->`
-
+[`<!-- Ссылка на видео: -->`
+](https://disk.yandex.ru/i/FzMsv7Az83Vpcw)
 ## Код
 
 - [`Config.kt`](src/main/kotlin/Config.kt) — system-промпты, `max_tokens`, `stop`, пример вопроса

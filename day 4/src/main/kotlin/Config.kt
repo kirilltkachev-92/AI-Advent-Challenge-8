@@ -52,7 +52,10 @@ object Config {
     const val TEMPERATURE_MAX = 2.0
     const val TEMPERATURE_STEP = 0.3
 
-    /** Значения от 0 до 2 с шагом 0.3 (конечная точка 2.0 включена). */
+    /** Дополнительные значения между шагами (например, 0.7 между 0.6 и 0.9). */
+    private val EXTRA_TEMPERATURES = listOf(0.7)
+
+    /** Значения от 0 до 2 с шагом 0.3, плюс дополнительные точки (конечная 2.0 включена). */
     val TEMPERATURE_STEPS: List<Double> = buildList {
         var t = TEMPERATURE_MIN
         while (t <= TEMPERATURE_MAX + 1e-9) {
@@ -62,7 +65,8 @@ object Config {
         if (isEmpty() || last() < TEMPERATURE_MAX - 1e-9) {
             add(TEMPERATURE_MAX)
         }
-    }
+        addAll(EXTRA_TEMPERATURES.map(::roundTemperature))
+    }.distinct().sorted()
 
     private fun roundTemperature(value: Double): Double =
         kotlin.math.round(value * 10.0) / 10.0

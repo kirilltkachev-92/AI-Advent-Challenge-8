@@ -45,8 +45,14 @@ class InvariantStore(rootDir: Path = Path.of(Config.INVARIANTS_DIR)) {
     val path: Path get() = file
 
     companion object {
-        /** Примеры инвариантов из задания: стек, решения, архитектура, бизнес-правила. */
+        /** Примеры инвариантов из задания: домен, стек, решения, архитектура, бизнес-правила. */
         val DEFAULTS: List<Invariant> = listOf(
+            Invariant(
+                id = "domain-android-only",
+                category = "домен",
+                rule = "Агент работает ТОЛЬКО с Android-приложениями (Kotlin/Jetpack). Запросы вне " +
+                    "Android (бэкенд, веб, десктоп, CLI, скрипты, ML-пайплайны и т.п.) не выполняются.",
+            ),
             Invariant(
                 id = "stack-no-rxjava",
                 category = "стек",

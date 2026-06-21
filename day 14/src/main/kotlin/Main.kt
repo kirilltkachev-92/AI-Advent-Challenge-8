@@ -1,5 +1,5 @@
 /**
- * Консольный кодинг-агент с задачей-конечным автоматом и многоагентным пайплайном.
+ * Консольный Android кодинг-агент с задачей-конечным автоматом и многоагентным пайплайном.
  * На каждом этапе работают свои агенты (часть — роем параллельных инстансов), переходы
  * детерминированы и проверяются в коде, состояние переживает перезапуск (пауза/возобновление).
  * Здесь — REPL, интервью профиля и вывод; вся логика в [CodingAgent] и [CodingPipeline].
@@ -251,7 +251,7 @@ private fun showArtifact(agent: CodingAgent, stageId: String?) {
 }
 
 private fun printProfile(p: DevProfile) {
-    println("\n" + color("[Профиль разработчика]", Ansi.CYAN))
+    println("\n" + color("[Профиль Android-разработчика]", Ansi.CYAN))
     println("  • Язык: ${p.language}")
     println("  • Стек/фреймворки: ${p.stack.ifBlank { "—" }}")
     println("  • Уровень: ${p.experience}")
@@ -340,15 +340,15 @@ private class OnboardingQuestion(
 
 private val ONBOARDING = listOf(
     OnboardingQuestion(
-        "Основной язык программирования?",
-        "например: Kotlin, Python, TypeScript, Go, Rust…",
+        "Язык (Android)?",
+        "Kotlin или Java",
         "Kotlin",
         { p, v -> p.copy(language = v) },
     ),
     OnboardingQuestion(
-        "Стек / фреймворки?",
-        "например: Ktor + Coroutines, Spring Boot, Android + Compose, FastAPI… (Enter — пропустить)",
-        "",
+        "Стек / UI-подход (Android)?",
+        "например: Jetpack Compose, XML Views, Hilt, Coroutines/Flow, Room… (Enter — Compose)",
+        "Jetpack Compose",
         { p, v -> p.copy(stack = v) },
     ),
     OnboardingQuestion(
@@ -365,7 +365,7 @@ private val ONBOARDING = listOf(
     ),
     OnboardingQuestion(
         "Жёсткие ограничения проекта?",
-        "через запятую, например: только stdlib, обязательны тесты, без сети (Enter — пропустить)",
+        "через запятую, например: только Compose, обязательны тесты, minSdk 24 (Enter — пропустить)",
         "",
         { p, v ->
             val items = v.split(',', ';').map { it.trim() }.filter { it.isNotEmpty() }
@@ -382,7 +382,7 @@ private fun runOnboardingIfNew(agent: CodingAgent) {
 private fun runOnboarding(agent: CodingAgent) {
     println(
         color("\nагент ›", Ansi.BOLD) +
-            " Настроим профиль разработчика — отвечайте своими словами (Enter — значение по умолчанию).",
+            " Настроим профиль Android-разработчика — отвечайте своими словами (Enter — значение по умолчанию).",
     )
     var p = DevProfile()
     for (q in ONBOARDING) {
@@ -422,33 +422,39 @@ private fun resetState(agent: CodingAgent) {
 // ---------- Авто-демо для записи ----------
 
 /**
- * Демонстрирует инварианты на задаче «Android Hello World»: проект запрещает RxJava и MVP.
- * Сначала конфликтный запрос (Hello World на MVP + RxJava) → отказ с объяснением; затем чистый
- * запрос → пайплайн идёт (planning → execution) и код соблюдает инварианты.
+ * Демонстрирует инварианты: проект только для Android, запрещает RxJava и MVP.
+ * Не-Android запрос (бэкенд) → отказ (домен); Hello World на MVP + RxJava → отказ (стек+архитектура);
+ * затем чистый Hello World → пайплайн идёт (planning → execution) и код соблюдает инварианты.
  * В конце восстанавливает прежнее состояние задачи. speed (напр. 1.5) растягивает паузы.
  */
 private fun runDemo(agent: CodingAgent, speedArg: String?) {
     val speed = speedArg?.replace(',', '.')?.toDoubleOrNull()?.coerceIn(0.2, 5.0) ?: 1.0
     val saved = agent.snapshotTask()
 
-    caption("Инварианты проекта (хранятся отдельно). Среди них — запрет RxJava и MVP", speed)
+    caption("Инварианты проекта (хранятся отдельно): только Android, без RxJava и MVP", speed)
     demoType("/inv", speed)
     printInvariants(agent)
     pause(2.5, speed)
 
-    caption("Шаг 1. Конфликтный запрос: Hello World на MVP + RxJava → агент ОТКАЗЫВАЕТ", speed)
+    caption("Шаг 1. Не-Android запрос: бэкенд → агент ОТКАЗЫВАЕТ (домен)", speed)
+    val backend = "Сделай REST API бэкенд на Node.js с базой Postgres"
+    demoType("/task $backend", speed)
+    printOutcome(agent.startTask(backend))
+    pause(2.5, speed)
+
+    caption("Шаг 2. Конфликтный запрос: Hello World на MVP + RxJava → агент ОТКАЗЫВАЕТ (стек + архитектура)", speed)
     val bad = "Сделай Android-приложение Hello World на архитектуре MVP с использованием RxJava"
     demoType("/task $bad", speed)
     printOutcome(agent.startTask(bad))
     pause(2.5, speed)
 
-    caption("Шаг 2. Тот же продукт без запрещённого — допустимый запрос принимается (planning)", speed)
+    caption("Шаг 3. Тот же продукт без запрещённого — допустимый запрос принимается (planning)", speed)
     val good = "Создай Android-приложение, которое показывает «Hello World» в главной Activity"
     demoType("/task $good", speed)
     printOutcome(agent.startTask(good))
     pause(2.5, speed)
 
-    caption("Шаг 3. /next → execution: код Hello World, проверяется на инварианты (без RxJava/MVP)", speed)
+    caption("Шаг 4. /next → execution: код Hello World, проверяется на инварианты (без RxJava/MVP)", speed)
     demoType("/next", speed)
     printOutcome(agent.advance())
     pause(1.5, speed)
@@ -474,7 +480,7 @@ private fun pause(seconds: Double, speed: Double) {
 }
 
 private fun printBanner(agent: CodingAgent) {
-    println(color("День 14 — кодинг-агент с инвариантами (жёсткими ограничениями состояния)", Ansi.BOLD))
+    println(color("День 14 — Android кодинг-агент с инвариантами (жёсткими ограничениями состояния)", Ansi.BOLD))
     println(
         color(
             "${Config.model()} · конечный автомат задачи · ${agent.invariants().size} инвариантов соблюдаются неукоснительно",

@@ -120,6 +120,24 @@ class InvariantTest {
     }
 
     @Test
+    fun `defaults include the android-only domain invariant`() {
+        assertTrue(InvariantStore.DEFAULTS.any { it.id == "domain-android-only" })
+    }
+
+    @Test
+    fun `non-Android request is refused via the android-only invariant`() {
+        // Доменный инвариант проверяется LLM-контролёром (без forbid-токена) — задаём его вердикт.
+        val client = InvFakeClient(
+            guardJson = "{\"violations\":[{\"id\":\"domain-android-only\",\"why\":\"это бэкенд, не Android\"}]}",
+        )
+        val agent = tempAgent(client)
+        val outcome = agent.startTask("Сделай бэкенд-сервис на Node.js с REST API")
+        assertTrue(outcome is StageOutcome.Refused)
+        assertTrue((outcome as StageOutcome.Refused).violations.any { it.invariant.id == "domain-android-only" })
+        assertTrue(agent.task.isEmpty())
+    }
+
+    @Test
     fun `clean request is accepted and runs planning`() {
         val agent = tempAgent(InvFakeClient())
         val outcome = agent.startTask("Сделай функцию суммирования списка чисел")

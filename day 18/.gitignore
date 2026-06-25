@@ -1,0 +1,10 @@
+.gradle/
+build/
+.idea/
+*.iml
+.env
+local.properties
+.kotlin/
+
+# Хранилище замеров планировщика
+data/

@@ -1,0 +1,10 @@
+.gradle/
+build/
+.idea/
+*.iml
+.env
+local.properties
+.kotlin/
+
+# Файлы, сохранённые инструментом save_to_file
+output/

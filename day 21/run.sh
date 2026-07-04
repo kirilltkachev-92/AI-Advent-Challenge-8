@@ -20,8 +20,15 @@ fi
 
 export PATH="$JAVA_HOME/bin:$PATH"
 # Пайплайн индексации: index | compare | search «запрос» | без аргументов = всё.
-if [[ $# -gt 0 ]]; then
-  exec ./gradlew run -q --console=plain --args="$*"
+# Запрос оборачиваем в двойные кавычки: --args парсит сам Gradle, и апостроф
+# в тексте («GPT-3's») иначе ломает разбор как «unbalanced quotes».
+if [[ $# -gt 1 ]]; then
+  cmd="$1"; shift
+  rest="$*"
+  rest="${rest//\"/}" # двойные кавычки внутри запроса Gradle не экранирует — убираем
+  exec ./gradlew run -q --console=plain --args="$cmd \"$rest\""
+elif [[ $# -eq 1 ]]; then
+  exec ./gradlew run -q --console=plain --args="$1"
 else
   exec ./gradlew run -q --console=plain
 fi

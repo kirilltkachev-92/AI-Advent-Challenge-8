@@ -1,0 +1,11 @@
+.gradle/
+build/
+.idea/
+*.iml
+.env
+local.properties
+.kotlin/
+
+# Индексы тяжёлые (~3 МБ) и воспроизводимы (./run.sh index) — не коммитим,
+# а отчёт сравнения — результат задания, его оставляем.
+output/index-*.json

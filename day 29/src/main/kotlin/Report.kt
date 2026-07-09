@@ -55,7 +55,7 @@ object Report {
             append("| День ${case.day} — ${case.gold.title} |")
             results.forEach { r ->
                 val s = r.caseRuns[i].firstScore
-                append(" ${s?.let { "${it.total} ${flags(it)}" } ?: "ошибка"} |")
+                append(" ${s?.let { "${it.total} ${it.flags()}" } ?: "ошибка"} |")
             }
             appendLine()
         }
@@ -63,28 +63,32 @@ object Report {
         appendLine("Обозначения: J — строгий JSON, D — day, T — title, Θ — theme, R — result, F — format; точка — балл потерян.")
         appendLine()
 
-        appendLine("## Примеры ответов (День 13 — самый показательный: state machine)")
+        appendLine("## Что спрашивали и что ответили")
         appendLine()
-        val exampleIdx = results.first().caseRuns.indexOfFirst { it.case.day == 13 }.takeIf { it >= 0 } ?: 0
-        results.forEach { r ->
-            val run = r.caseRuns[exampleIdx]
-            appendLine("<details><summary>${r.profile.key} (${run.firstScore?.total ?: "—"}/${Score.MAX})</summary>")
+        (0 until caseCountActual).forEach { i ->
+            val case = results.first().caseRuns[i].case
+            appendLine("### День ${case.day} — ${case.gold.title}")
+            appendLine()
+            appendLine("<details><summary>Вход — объявление из чата</summary>")
             appendLine()
             appendLine("```")
-            appendLine(run.answers.firstOrNull()?.take(1500) ?: "все запросы упали: ${run.errors.firstOrNull()}")
+            appendLine(case.text)
             appendLine("```")
             appendLine()
             appendLine("</details>")
             appendLine()
+            results.forEach { r ->
+                val run = r.caseRuns[i]
+                val score = run.firstScore
+                appendLine("<details><summary>Ответ «${r.profile.key}» — ${score?.let { "${it.total}/${Score.MAX} [${it.flags()}]" } ?: "ошибка"}</summary>")
+                appendLine()
+                appendLine("```")
+                appendLine(run.answers.firstOrNull() ?: "все запросы упали: ${run.errors.firstOrNull()}")
+                appendLine("```")
+                appendLine()
+                appendLine("</details>")
+                appendLine()
+            }
         }
-    }
-
-    private fun flags(s: Score): String = buildString {
-        append(if (s.strictJson) "J" else "·")
-        append(if (s.day) "D" else "·")
-        append(if (s.title) "T" else "·")
-        append(if (s.theme) "Θ" else "·")
-        append(if (s.result) "R" else "·")
-        append(if (s.format) "F" else "·")
     }
 }

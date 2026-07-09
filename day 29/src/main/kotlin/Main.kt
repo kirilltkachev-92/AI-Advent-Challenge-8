@@ -73,13 +73,15 @@ fun main() {
                     .onFailure { errors += (it.message ?: it.javaClass.simpleName).take(200) }
             }
             val first = scores.firstOrNull()
-            println(
-                "  День %2d: %s, %d мс".format(
-                    case.day,
-                    first?.let { "${it.total}/${Score.MAX}" } ?: "ошибка (${errors.firstOrNull()?.take(60)})",
-                    latencies.firstOrNull() ?: 0,
-                ),
-            )
+            println()
+            println("  задание → ${case.text.lineSequence().first()}")
+            when (val answer = answers.firstOrNull()) {
+                null -> println("  ответ   → ошибка: ${errors.firstOrNull()}")
+                else -> println("  ответ   → " + answer.trim().replace("\n", "\n            "))
+            }
+            first?.let {
+                println("  оценка  → ${it.total}/${Score.MAX} [${it.flags()}], ${latencies.firstOrNull() ?: 0} мс")
+            }
             CaseRun(case, answers, scores, latencies, speeds, errors)
         }
         val quality = caseRuns.sumOf { it.firstScore?.total ?: 0 }

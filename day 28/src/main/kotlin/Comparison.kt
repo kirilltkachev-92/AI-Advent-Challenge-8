@@ -85,7 +85,7 @@ object Comparison {
                 Triple(r.answer, r.totalMs, r.tokensPerSec)
             }
             println("  локальная: ${localRun.avgLatency} мс в среднем, ошибок ${localRun.errors.size}")
-            localRun.firstAnswer?.let { println("  → ${it.replace("\n", " ").take(160)}") }
+            localRun.firstAnswer?.let { println(fullAnswer(it)) }
 
             val cloudRun = cloud?.let { c ->
                 runModel("облачная `${Config.deepSeekModel()}`", runs) {
@@ -93,7 +93,7 @@ object Comparison {
                     Triple(r.answer, r.totalMs, r.tokensPerSec)
                 }.also { run ->
                     println("  облачная: ${run.avgLatency} мс в среднем, ошибок ${run.errors.size}")
-                    run.firstAnswer?.let { println("  → ${it.replace("\n", " ").take(160)}") }
+                    run.firstAnswer?.let { println(fullAnswer(it)) }
                 }
             }
 
@@ -110,6 +110,10 @@ object Comparison {
             ?.let { println("ИТОГ качество: локальная ${it.sum()}/$maxScore, облачная ${rows.mapNotNull { r -> r.cloudScore }.sum()}/$maxScore") }
         println("Отчёт: $reportPath")
     }
+
+    /** Ответ модели целиком, с отступом под колонку лога. */
+    private fun fullAnswer(answer: String): String =
+        "  → " + answer.trim().replace("\n", "\n    ")
 
     /** N прогонов одного промпта; ошибки не валят сравнение, а копятся в статистику стабильности. */
     private fun runModel(name: String, runs: Int, call: () -> Triple<String, Long, Double>): ModelRun {

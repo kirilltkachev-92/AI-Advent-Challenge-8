@@ -29,6 +29,16 @@ data class Score(
     val total: Int
         get() = listOf(strictJson, day, title, theme, result, format).count { it }
 
+    /** J/D/T/Θ/R/F — какой балл взят; точка — потерян. */
+    fun flags(): String = buildString {
+        append(if (strictJson) "J" else "·")
+        append(if (day) "D" else "·")
+        append(if (title) "T" else "·")
+        append(if (theme) "Θ" else "·")
+        append(if (result) "R" else "·")
+        append(if (format) "F" else "·")
+    }
+
     companion object {
         const val MAX = 6
     }

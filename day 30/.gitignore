@@ -1,0 +1,7 @@
+.gradle/
+build/
+.idea/
+*.iml
+.env
+.kotlin/
+output/index-chat.json

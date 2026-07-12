@@ -1,0 +1,20 @@
+# systemd-юнит приватного LLM-сервиса (кладётся в /etc/systemd/system/day30.service)
+[Unit]
+Description=Day 30 — private local-LLM service (AI Advent Challenge #8)
+After=network-online.target ollama.service
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/opt/day30
+EnvironmentFile=/opt/day30/.env
+ExecStart=/usr/bin/java -Xmx512m -jar /opt/day30/day30-service.jar serve
+Restart=on-failure
+RestartSec=5
+User=day30
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/day30/output
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

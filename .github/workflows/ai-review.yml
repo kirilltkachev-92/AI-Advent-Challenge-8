@@ -22,7 +22,7 @@ permissions:
 jobs:
   review:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45 # запас на редкий случай пересборки индекса в CI
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,14 +41,9 @@ jobs:
           path: ~/.ollama/models
           key: ollama-nomic-embed-text
 
-      # Индекс НЕ строится заново на каждый прогон (замечание тьютора в чате):
-      # ключ кеша — хеш документации и кода; пересчёт только при смене корпуса.
-      - name: Cache RAG index
-        uses: actions/cache@v4
-        with:
-          path: day 32/output/index-repo.json
-          key: rag-index-${{ hashFiles('day */README.md', 'day */docs/*.md', 'day */src/**/*.kt') }}
-
+      # Индекс НЕ строится на каждый прогон (замечание тьютора в чате):
+      # он построен локально и закоммичен (day 32/output/index-repo.json);
+      # Indexer сверяет SHA корпуса и пересчитывает только если индекс устарел.
       - name: Install Ollama
         run: |
           curl -fsSL https://ollama.com/install.sh | sh

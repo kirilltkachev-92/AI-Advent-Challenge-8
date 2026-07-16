@@ -1,0 +1,73 @@
+# День 32: автоматическое AI-ревью кода.
+# Реактивный пайплайн (уточнение тьютора): запускается сам на каждый PR,
+# получает diff, строит RAG-контекст из документации и кода репозитория
+# и оставляет ревью комментом в PR.
+name: AI Review
+
+on:
+  pull_request:
+  # Прогрев кешей на main (модель + индекс + gradle): кеши, созданные на main,
+  # доступны всем будущим PR — первый же настоящий PR ревьюится быстро.
+  workflow_dispatch:
+
+# Не ревьюить устаревший коммит, если в PR уже запушили новый.
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # нужна история base и head для three-dot diff
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      # Модель эмбеддингов кешируется между прогонами (~270 МБ).
+      - name: Cache Ollama models
+        uses: actions/cache@v4
+        with:
+          path: ~/.ollama/models
+          key: ollama-nomic-embed-text
+
+      # Индекс НЕ строится заново на каждый прогон (замечание тьютора в чате):
+      # ключ кеша — хеш документации и кода; пересчёт только при смене корпуса.
+      - name: Cache RAG index
+        uses: actions/cache@v4
+        with:
+          path: day 32/output/index-repo.json
+          key: rag-index-${{ hashFiles('day */README.md', 'day */docs/*.md', 'day */src/**/*.kt') }}
+
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          (nohup ollama serve >/dev/null 2>&1 &) || true
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:11434/api/tags >/dev/null && break
+            sleep 1
+          done
+          ollama pull nomic-embed-text
+
+      - name: Review PR
+        if: github.event_name == 'pull_request'
+        working-directory: day 32
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew run -q --console=plain --args=ci
+
+      - name: Warm up index (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: day 32
+        run: ./gradlew run -q --console=plain --args=index

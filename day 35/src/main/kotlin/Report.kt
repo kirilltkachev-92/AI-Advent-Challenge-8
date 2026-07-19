@@ -3,7 +3,8 @@ import kotlin.io.path.writeText
 
 /**
  * Отчёт конвейера — output/report.md: факты, проверки, решение модели,
- * итог публикации. Release notes уходят отдельным файлом (их читает gh).
+ * итог публикации. Release notes пишутся отдельно, сразу после черновика
+ * (их читает gh на шаге публикации).
  */
 object Report {
 
@@ -16,7 +17,6 @@ object Report {
         dryRun: Boolean,
     ) {
         Files.createDirectories(Config.outputDir())
-        Config.releaseNotesFile().writeText(draft.notes + "\n")
 
         val md = buildString {
             appendLine("# День 35. Отчёт конвейера подготовки релиза")

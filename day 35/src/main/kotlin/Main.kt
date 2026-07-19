@@ -1,3 +1,6 @@
+import java.nio.file.Files
+import kotlin.io.path.writeText
+
 /**
  * День 35. Реальная задача: AI-конвейер подготовки релиза.
  *
@@ -46,6 +49,9 @@ fun main(args: Array<String>) {
     val agent = ReleaseAgent(apiKey)
     println("[3/4] DeepSeek готовит черновик релиза (версия + release notes)...")
     val draft = agent.draft(facts)
+    // Notes на диск сразу: их читает gh release create на шаге публикации.
+    Files.createDirectories(Config.outputDir())
+    Config.releaseNotesFile().writeText(draft.notes + "\n")
     println("      версия: ${draft.version} — ${draft.versionReason}")
     println("      заголовок: «${draft.title}»")
     println("      notes: ${draft.notes.lines().size} строк → output/release-notes.md")

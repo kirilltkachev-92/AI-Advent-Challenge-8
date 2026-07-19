@@ -20,12 +20,20 @@ object Preflight {
             Check("Ветка", CheckStatus.FAIL, "релиз только с main, сейчас: ${facts.branch}")
         }
 
-        // Изменённые tracked-файлы — блокер; неотслеживаемый мусор (.DS_Store) — предупреждение.
+        // Изменённые tracked-файлы — блокер. Исключения — предупреждения:
+        // собственные артефакты конвейера (day 35/output/* перегенерируются
+        // каждым прогоном, иначе prepare блокировал бы следующий publish)
+        // и неотслеживаемый мусор (.DS_Store).
         val modified = facts.dirtyFiles.filterNot { it.startsWith("??") }
+        val (ownArtifacts, foreign) = modified.partition {
+            it.drop(2).trim().trim('"').startsWith("day 35/output/")
+        }
         val untracked = facts.dirtyFiles.filter { it.startsWith("??") }
         checks += when {
-            modified.isNotEmpty() ->
-                Check("Рабочее дерево", CheckStatus.FAIL, "незакоммиченные изменения: ${modified.joinToString()}")
+            foreign.isNotEmpty() ->
+                Check("Рабочее дерево", CheckStatus.FAIL, "незакоммиченные изменения: ${foreign.joinToString()}")
+            ownArtifacts.isNotEmpty() ->
+                Check("Рабочее дерево", CheckStatus.WARN, "перегенерированы артефакты конвейера: ${ownArtifacts.joinToString { it.drop(2).trim().trim('"') }}")
             untracked.isNotEmpty() ->
                 Check("Рабочее дерево", CheckStatus.WARN, "неотслеживаемые файлы: ${untracked.joinToString { it.removePrefix("?? ") }}")
             else -> Check("Рабочее дерево", CheckStatus.OK, "чисто")

@@ -1,0 +1,25 @@
+=== День 35. AI-конвейер подготовки релиза ===
+Режим: prepare (сухой прогон)
+
+[1/4] Собираю факты репозитория (git, gh)...
+      kirilltkachev-92/AI-Advent-Challenge-8 · ветка main · HEAD 2495384
+      коммитов в релиз: 40 · дней челленджа: 35 · последний тег: нет
+
+[2/4] Преflight-проверки:
+      ✅ Ветка: main
+      ⚠️ Рабочее дерево: неотслеживаемые файлы: .DS_Store, "day 1/.DS_Store", "day 13/.DS_Store", "day 16/.DS_Store", "day 19/.DS_Store", "day 21/.DS_Store", "day 35/"
+      ✅ Синхронизация с origin: HEAD совпадает с origin/main
+      ✅ GitHub CLI: авторизован, репозиторий kirilltkachev-92/AI-Advent-Challenge-8
+      ✅ История для релиза: 40 коммитов с начала истории (первый релиз)
+
+[3/4] DeepSeek готовит черновик релиза (версия + release notes)...
+      версия: v1.0.0 — Первый стабильный релиз после завершения марафона из 35 дней.
+      заголовок: «AI Advent Challenge #8: 35 дней с LLM»
+      notes: 26 строк → output/release-notes.md
+
+[4/4] DeepSeek выносит вердикт release gate...
+      ✅ GO — Релиз готов к публикации: нет блокеров, неотслеживаемые .DS_Store не влияют.
+      предупреждение: Неотслеживаемые файлы: .DS_Store, day 1/.DS_Store, day 13/.DS_Store, day 16/.DS_Store, day 19/.DS_Store, day 21/.DS_Store, day 35/
+
+Отчёт: output/report.md · Release notes: output/release-notes.md
+Публикация: ./run.sh publish
